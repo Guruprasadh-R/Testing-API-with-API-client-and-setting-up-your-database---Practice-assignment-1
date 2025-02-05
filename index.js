@@ -33,19 +33,41 @@
 
 
 const express = require('express');
-const { resolve } = require('path');
+const bodyParser = require('body-parser');
 
 const app = express();
 const port = 3010;
 
-app.use(express.static('static'));
+// Use bodyParser to parse JSON request bodies
+app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-  res.sendFile(resolve(__dirname, 'pages/index.html'));
+// Example student data
+const students = [
+    { student_id: "1", name: "Alice Johnson", total: 433 },
+    { student_id: "2", name: "Bob Smith", total: 410 },
+    { student_id: "3", name: "Charlie Davis", total: 390 }
+];
+
+// POST endpoint to retrieve students above the threshold
+app.post('/students/above-threshold', (req, res) => {
+    const { threshold } = req.body;
+
+    // Check if the threshold is a number
+    if (typeof threshold !== 'number') {
+        return res.status(400).json({ error: "Threshold must be a number" });
+    }
+
+    // Filter students based on the threshold
+    const filteredStudents = students.filter(student => student.total > threshold);
+    
+    // Send the response
+    res.json({
+        count: filteredStudents.length,
+        students: filteredStudents
+    });
 });
 
+// Start the server
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });
-
-
